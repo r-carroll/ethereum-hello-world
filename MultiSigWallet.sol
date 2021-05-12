@@ -1,5 +1,5 @@
-pragma solidity ^0.5.0;
-pragma experimental ABIEncoderV2;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
 
 contract MultiSigWallet {
     uint minApprovers;
@@ -11,14 +11,14 @@ contract MultiSigWallet {
     mapping (address => bool) isApprover;
     uint approvalsNum;
 
-    constructor(address[] memory _approvers, uint _minApprovers, address payable _beneficiary) public payable {
+    constructor(address[] memory _approvers, uint _minApprovers, address payable _beneficiary) payable {
         require(
             _minApprovers <= _approvers.length,
             "Required number of apporvers should be less than number of approvers");
 
         minApprovers = _minApprovers;
         beneficiary = _beneficiary;
-        owner = msg.sender;
+        owner = payable(msg.sender);
 
         for (uint i = 0; i < _approvers.length; i++) {
             address approver = _approvers[i];
@@ -34,7 +34,7 @@ contract MultiSigWallet {
         }
 
         if (approvalsNum == minApprovers) {
-            beneficiary.send(address(this).balance);
+            beneficiary.transfer(address(this).balance);
             selfdestruct(owner);
         }
     }
